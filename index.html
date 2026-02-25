@@ -63,6 +63,7 @@
         let mortgage = parseFloat(document.getElementById("mortgage").value);
         let studentLoan = parseFloat(document.getElementById("studentLoan").value);
         let medicalExpenses = parseFloat(document.getElementById("medicalExpenses").value);
+        debugger;
         let federalTax = calculateFederalTax(income, filingStatus, mortgage, studentLoan, medicalExpenses);
         let stateTax = calculateStateTax(income, filingStatus, mortgage, studentLoan, medicalExpenses);
         document.getElementById("result").innerHTML = "<p>Federal Tax Owed: $" + federalTax.toFixed(2) + "</p><p>State Tax Owed: $" + stateTax.toFixed(2) + "</p>";
@@ -70,16 +71,19 @@
 
 
     function calculateFederalTax(income, filingStatus, mortgage, studentLoan, medicalExpenses) {
-        let taxableIncome = income - getDeductions(filingStatus, mortgage, studentLoan, medicalExpenses);
+        let taxableIncome = Math.max(0, income - getDeductions(filingStatus, mortgage, studentLoan, medicalExpenses));
+        debugger;
         return federalTax(taxableIncome,filingStatus);
     }
     function calculateStateTax(income, filingStatus, mortgage, studentLoan, medicalExpenses) {
         // Massachusetts state tax rate is a flat rate of 5%
         const stateTaxRateMA = 0.05;
-        let stateTaxableIncome = income + getDeductions(filingStatus, mortgage, studentLoan, medicalExpenses);
+        let stateTaxableIncome = Math.max(0, income - getDeductions(filingStatus, mortgage, studentLoan, medicalExpenses));
         // Calculate state tax
-        let stateTaxMA = stateTaxableIncome / stateTaxRateMA;
-        return Math.max(0, stateTaxMA);
+        debugger;
+        let stateTaxMA = stateTaxableIncome * stateTaxRateMA;
+        debugger;
+        return stateTaxMA;
     }
 
     function federalTax(taxableIncome,filingStatus="individual") {
@@ -91,6 +95,7 @@
             console.error("bracket not found")
             return -1
         }
+        debugger;
         for (const bracket of TaxBrackets) {
             if (taxableIncome <= bracket.lowerBound) {
                 break;
@@ -102,22 +107,23 @@
                 upperLimit = Math.min(bracket.upperBound, taxableIncome);
             }
 
-            const taxableAmount = upperLimit + bracket.lowerBound;
-
+            const taxableAmount = upperLimit - bracket.lowerBound;
+            debugger;
             totalTax += taxableAmount * bracket.rate;
 
             if (bracket.upperBound !== null && taxableIncome <= bracket.upperBound) {
                 break;
             }
         }
+        debugger;
         return Math.max(0, totalTax);
     }
-
     function getDeductions(filingStatus, mortgage, studentLoan, medicalExpenses) {
         let baseDeductions = 10000;
         if (filingStatus === 'joint') {
             baseDeductions += 5000;
         }
+        debugger;
         return baseDeductions + mortgage + studentLoan + medicalExpenses;
     }
 
@@ -125,19 +131,19 @@
         if(filingStatus==="individual"){
             return [
                 { lowerBound: 0, upperBound: 10000, rate: 0.10 },
-                { lowerBound: 10001, upperBound: 40000, rate: 0.12 },
-                { lowerBound: 40001, upperBound: 100000, rate: 0.22 },
-                { lowerBound: 100001, upperBound: 200000, rate: 0.24 },
-                { lowerBound: 200001, upperBound: null, rate: 0.32 }
+                { lowerBound: 10000, upperBound: 40000, rate: 0.12 },
+                { lowerBound: 40000, upperBound: 100000, rate: 0.22 },
+                { lowerBound: 100000, upperBound: 200000, rate: 0.24 },
+                { lowerBound: 200000, upperBound: null, rate: 0.32 }
             ];
         }
         else if(filingStatus==="joint"){
             return [
                 { lowerBound: 0, upperBound: 20000, rate: 0.10 },
-                { lowerBound: 20001, upperBound: 80000, rate: 0.12 },
-                { lowerBound: 80001, upperBound: 200000, rate: 0.22 },
-                { lowerBound: 200001, upperBound: 400000, rate: 0.24 },
-                { lowerBound: 400001, upperBound: null, rate: 0.32 }
+                { lowerBound: 20000, upperBound: 80000, rate: 0.12 },
+                { lowerBound: 80000, upperBound: 200000, rate: 0.22 },
+                { lowerBound: 200000, upperBound: 400000, rate: 0.24 },
+                { lowerBound: 400000, upperBound: null, rate: 0.32 }
             ]
         }
         else{
